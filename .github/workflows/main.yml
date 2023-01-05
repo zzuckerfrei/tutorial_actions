@@ -14,15 +14,10 @@ jobs:
         with:
           java-version: 17
 
-#       - name: set daemon.json
-#         run: echo ${{  env.TEXT  }} > /etc/docker/daemon.json
-#      - name: Build with Maven
-#        run: mvn clean package -DskipTests
-
       - name: Build Docker image
         run: docker build -t tutorial-actions .
 
-      - name: set tag
+      - name: Set Tag
         run: docker tag tutorial-actions ${{  secrets.REGISTRY_URL  }}/tutorial-actions:1.0
 
       - name: Log in to registry
