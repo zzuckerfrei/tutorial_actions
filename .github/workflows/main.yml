@@ -1,6 +1,6 @@
 name: Github Actions Tutorial
 
-# todo 실행 조건 추가하기
+
 on: [push]
 
 env:
@@ -11,6 +11,7 @@ jobs:
   build:
     name: Build and push
     runs-on: self-hosted
+    # todo 실행 조건 추가하기
     if: ${{ contains(github.event.head_commit.message, '#dev') || contains(github.event.head_commit.message, '#smlee')}}
     steps:
       - uses: actions/checkout@v2
