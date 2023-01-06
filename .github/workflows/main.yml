@@ -11,7 +11,7 @@ jobs:
   build:
     name: Build and push
     runs-on: self-hosted
-    if: ${{ contains(github.event.head_commit.message, '#dev') || contains(github.event.head_commit.message, '#smlee')}}
+    if: ${{ contains(github.event.head_commit.message, '#dev') || contains(github.event.head_commit.message, '#cicd')}}
     steps:
       - uses: actions/checkout@v2
 
@@ -21,7 +21,7 @@ jobs:
           java-version: 17
 
       - name: Build Docker image
-        run: docker build -t tutorial-actions .
+        run: docker build -t ${{  env.IMAGE_NAME  }} .
 
       - name: Log in to registry
         run: docker login ${{  secrets.REGISTRY_URL  }} -u ${{  secrets.REGISTRY_USERNAME  }} -p ${{  secrets.REGISTRY_PASSWORD  }}
@@ -33,8 +33,16 @@ jobs:
 #          images: ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}
 
       - name: Set Image Tag
-        run: docker tag tutorial-actions ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
+        run: docker tag ${{  env.IMAGE_NAME  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
 
       - name: Push image to registry
         run: docker push ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
+
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Run Container
+        run: docker run ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} && echo "=== finish ==="
 
