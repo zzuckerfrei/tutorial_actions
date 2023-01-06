@@ -1,9 +1,11 @@
 name: Github Actions Tutorial
 
+# todo 실행 조건 추가하기
 on: [push]
 
 env:
   IMAGE_NAME: tutorial-actions
+  IMAGE_VERSION: 1.0
 
 jobs:
   build:
@@ -23,15 +25,15 @@ jobs:
       - name: Log in to registry
         run: docker login ${{  secrets.REGISTRY_URL  }} -u ${{  secrets.REGISTRY_USERNAME  }} -p ${{  secrets.REGISTRY_PASSWORD  }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}
+#      - name: Extract metadata (tags, labels) for Docker
+#        id: meta
+#        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+#        with:
+#          images: ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}
 
-#      - name: Set Tag
-#        run: docker tag tutorial-actions ${{  secrets.REGISTRY_URL  }}/tutorial-actions:1.0
+      - name: Set Image Tag
+        run: docker tag tutorial-actions ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
 
       - name: Push image to registry
-        run: docker push ${{  secrets.REGISTRY_URL  }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
+        run: docker push ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
 
