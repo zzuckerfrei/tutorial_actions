@@ -44,5 +44,5 @@ jobs:
     needs: build
     steps:
       - name: Run Container
-        run: docker run -p 8080:8080 --name ${{  env.IMAGE_NAME  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
+        run: docker run -itd -p 8080:8080 --name ${{  env.IMAGE_NAME  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
 
