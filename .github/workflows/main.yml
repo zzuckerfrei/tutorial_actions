@@ -25,6 +25,7 @@ jobs:
   build:
     name: Build and push
     runs-on: self-hosted
+    needs: before
     steps:
       - uses: actions/checkout@v2
 
@@ -54,7 +55,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: self-hosted
-    needs: check
+    needs: build
     steps:
       - name: Run Container
         run: docker run -itd -p 8888:8080 --name ${{  env.IMAGE_NAME  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
