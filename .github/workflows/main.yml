@@ -44,6 +44,8 @@ jobs:
     runs-on: self-hosted
     needs: build
     steps:
+      - name: set env
+        run: source ~/.bashrc
       - name: image
         run: docker image rm --force ${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
       - name: remote image
