@@ -44,10 +44,12 @@ jobs:
     runs-on: self-hosted
     needs: build
     steps:
+      - name: who?
+        run: whoami
       - name: set env
         run: source ~/.bashrc
       - name: image
-        run: docker image rm --force ${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
+        run: source ~/.bashrc && docker image rm --force ${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
       - name: remote image
         run: docker image rm --force ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
       - name: container
