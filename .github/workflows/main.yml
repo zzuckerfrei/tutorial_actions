@@ -21,7 +21,7 @@ jobs:
           java-version: 17
 
       - name: Build Docker image
-        run: docker build -t ${{  env.IMAGE_NAME  }} .
+        run: docker build -t ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} .
 
       - name: Log in to registry
         run: docker login ${{  secrets.REGISTRY_URL  }} -u ${{  secrets.REGISTRY_USERNAME  }} -p ${{  secrets.REGISTRY_PASSWORD  }}
@@ -33,15 +33,23 @@ jobs:
 #          images: ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}
 
       - name: Set Image Tag
-        run: docker tag ${{  env.IMAGE_NAME  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
+        run: docker tag ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
 
       - name: Push image to registry
         run: docker push ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
 
+  check:
+    name: Check Duplication
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Check Duplication
+        run: sh /home/admin/test.sh
+
   deploy:
     name: Deploy
     runs-on: self-hosted
-    needs: build
+    needs: check
     steps:
       - name: Run Container
         run: docker run -itd -p 8080:8080 --name ${{  env.IMAGE_NAME  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="

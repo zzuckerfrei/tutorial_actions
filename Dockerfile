@@ -1,6 +1,6 @@
 # Use the OpenJDK 17 base image
-#FROM maven:3.8-openjdk-17-slim as build-tutorial
-FROM eclipse-temurin:17-jdk-alpine as build-tutorial
+FROM maven:3.8-openjdk-17-slim as build-tutorial
+#FROM eclipse-temurin:17-jdk-alpine as build-tutorial
 
 # Set the working directory to the project root
 WORKDIR /app
