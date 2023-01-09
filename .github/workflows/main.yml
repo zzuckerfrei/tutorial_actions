@@ -59,10 +59,10 @@ jobs:
       - name: Run Container
         run: docker run -itd -p 8888:8080 --name ${{  env.IMAGE_NAME  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
 
-  after-deploy:
-    name: After Deploy
-    runs-on: self-hosted
-    needs: deploy
-    steps:
-      - name: replace VAR
-        run:
+#  after-deploy:
+#    name: After Deploy
+#    runs-on: self-hosted
+#    needs: deploy
+#    steps:
+#      - name: replace VAR
+#        run:
