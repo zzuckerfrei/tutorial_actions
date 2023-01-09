@@ -42,6 +42,7 @@ jobs:
   clean:
     name: clean
     runs-on: self-hosted
+    needs: build
     steps:
       - name: image
         run: docker image rm --force ${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
