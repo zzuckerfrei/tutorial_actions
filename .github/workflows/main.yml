@@ -8,24 +8,10 @@ env:
   IMAGE_VERSION: "0.12"
 
 jobs:
-  # 여기서 관련 이미지, 컨테이너 삭제
-  before:
-    name: Before Job
-    runs-on: self-hosted
-    if: ${{ contains(github.event.head_commit.message, '#dev') || contains(github.event.head_commit.message, '#cicd')}}
-    steps:
-      - name: check username
-        run: whoami
-      - name: check pwd
-        run: pwd
-
-      - name: Check Duplication
-        run: sh /home/admin/test.sh
-
   build:
     name: Build and push
     runs-on: self-hosted
-    needs: before
+    if: ${{ contains(github.event.head_commit.message, '#dev') || contains(github.event.head_commit.message, '#cicd')}}
     steps:
       - uses: actions/checkout@v2
 
@@ -35,7 +21,7 @@ jobs:
           java-version: 17
 
       - name: Build Docker image
-        run: docker build -t ${{  env.IMAGE_NAME  }} .
+        run: docker build -t ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} .
 
       - name: Log in to registry
         run: docker login ${{  secrets.REGISTRY_URL  }} -u ${{  secrets.REGISTRY_USERNAME  }} -p ${{  secrets.REGISTRY_PASSWORD  }}
@@ -52,18 +38,34 @@ jobs:
       - name: Push image to registry
         run: docker push ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
 
+  # 여기서 관련 이미지, 컨테이너 삭제
+  clean:
+    name: clean
+    runs-on: self-hosted
+    steps:
+      - name: image
+        run: docker image rm --force ${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
+      - name: remote image
+        run: docker image rm --force ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
+      - name: container
+        run: docker stop ${{  env.IMAGE_NAME  }} && docker rm ${{  env.IMAGE_NAME  }}
+
   deploy:
     name: Deploy
     runs-on: self-hosted
-    needs: build
+    needs: clean
     steps:
       - name: Run Container
         run: docker run -itd -p 8888:8080 --name ${{  env.IMAGE_NAME  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
 
-#  after-deploy:
-#    name: After Deploy
-#    runs-on: self-hosted
-#    needs: deploy
-#    steps:
-#      - name: replace VAR
-#        run:
+  replace:
+    name: replace
+    runs-on: self-hosted
+    needs: deploy
+    steps:
+      - name: add VAR
+        run: export TUTO_IMG_VER=${{  env.IMAGE_NAME  }} >> ~/.bashrc
+      - name: replace VAR
+        run: source ~/.bashrc
+      - name: check VAR
+        run: echo $TUTO_IMG_VER
