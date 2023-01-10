@@ -9,10 +9,18 @@ env:
   IMAGE_VERSION: "0.16"
 
 jobs:
+  clean-1:
+    name: clean-1
+    runs-on: self-hosted
+    if: ${{ contains(github.event.head_commit.message, '#dev') || contains(github.event.head_commit.message, '#cicd')}}
+    steps:
+      - name: temp image
+        run: docker image rm --force ${{  env.TEMP_IMAGE_NAME  }}:latest
+
   build:
     name: Build
     runs-on: self-hosted
-    if: ${{ contains(github.event.head_commit.message, '#dev') || contains(github.event.head_commit.message, '#cicd')}}
+    needs: clean-1
     steps:
       - uses: actions/checkout@v2
 
@@ -25,18 +33,17 @@ jobs:
 #        run: docker build -t ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} .
         run: docker build -t ${{  env.TEMP_IMAGE_NAME  }} .
 
-  # 여기서 관련 이미지, 컨테이너 삭제
-  clean:
-    name: clean
+  clean-2:
+    name: clean-2
     runs-on: self-hosted
     needs: build
     steps:
       - name: container
         run: docker stop ${{  env.IMAGE_NAME  }} && docker rm ${{  env.IMAGE_NAME  }}
-      - name: temp image
-        run: docker image rm --force ${{  env.TEMP_IMAGE_NAME  }}:latest
+
       - name: local image
         run: source ~/.bashrc && docker image rm --force ${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
+
       - name: remote image
         run: source ~/.bashrc && docker image rm --force ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
 
@@ -48,12 +55,6 @@ jobs:
       - name: Log in to registry
         run: docker login ${{  secrets.REGISTRY_URL  }} -u ${{  secrets.REGISTRY_USERNAME  }} -p ${{  secrets.REGISTRY_PASSWORD  }}
 
-      #      - name: Extract metadata (tags, labels) for Docker
-      #        id: meta
-      #        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-      #        with:
-      #          images: ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}
-
       - name: Set local Image Tag
 #        run: docker tag ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
         run: docker tag ${{  env.TEMP_IMAGE_NAME  }} ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
@@ -64,6 +65,12 @@ jobs:
       - name: Push image to registry
         run: docker push ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
 
+      #      - name: Extract metadata (tags, labels) for Docker
+      #        id: meta
+      #        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      #        with:
+      #          images: ${{ secrets.REGISTRY_URL }}/${{ env.IMAGE_NAME }}
+
   deploy:
     name: Deploy
     runs-on: self-hosted
@@ -71,8 +78,6 @@ jobs:
     steps:
       - name: Run Container
         run: docker run -itd -p 8888:8080 --restart=always --name ${{  env.IMAGE_NAME  }} ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
-
-
 
   replace:
     name: replace
