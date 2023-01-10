@@ -6,7 +6,7 @@ on: [push]
 env:
   TEMP_IMAGE_NAME: temp-img
   IMAGE_NAME: tutorial-actions
-  IMAGE_VERSION: "0.16.2"
+  IMAGE_VERSION: "0.16.3"
 
 jobs:
   clean-1:
