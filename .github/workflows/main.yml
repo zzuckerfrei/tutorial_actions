@@ -79,12 +79,12 @@ jobs:
       - name: Run Container
         run: docker run -itd -p 8888:8080 --restart=always --name ${{  env.IMAGE_NAME  }} ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
 
-  replace:
-    name: replace
+  update:
+    name: update
     runs-on: self-hosted
     needs: deploy
     steps:
       - name: add VAR
         run: echo export TUTO_IMG_VER=${{  env.IMAGE_VERSION  }} >> ~/.bashrc
-      - name: replace & check VAR
+      - name: update & check VAR
         run: source ~/.bashrc && echo $TUTO_IMG_VER
