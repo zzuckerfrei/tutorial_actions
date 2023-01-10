@@ -4,8 +4,9 @@ name: Github Actions Tutorial
 on: [push]
 
 env:
+  TEMP_IMAGE_NAME: temp-img
   IMAGE_NAME: tutorial-actions
-  IMAGE_VERSION: "0.15"
+  IMAGE_VERSION: "0.16"
 
 jobs:
   build:
@@ -22,7 +23,7 @@ jobs:
 
       - name: Build Docker image
 #        run: docker build -t ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} .
-        run: docker build -t temp-img .
+        run: docker build -t ${{  env.TEMP_IMAGE_NAME  }} .
 
   # 여기서 관련 이미지, 컨테이너 삭제
   clean:
@@ -30,12 +31,14 @@ jobs:
     runs-on: self-hosted
     needs: build
     steps:
+      - name: container
+        run: docker stop ${{  env.IMAGE_NAME  }} && docker rm ${{  env.IMAGE_NAME  }}
+      - name: temp image
+        run: docker image rm --force ${{  env.TEMP_IMAGE_NAME  }}:latest
       - name: local image
         run: source ~/.bashrc && docker image rm --force ${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
       - name: remote image
         run: source ~/.bashrc && docker image rm --force ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:$TUTO_IMG_VER
-      - name: container
-        run: docker stop ${{  env.IMAGE_NAME  }} && docker rm ${{  env.IMAGE_NAME  }}
 
   push:
     name: Push
@@ -53,7 +56,7 @@ jobs:
 
       - name: Set local Image Tag
 #        run: docker tag ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
-        run: docker tag temp-img ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
+        run: docker tag ${{  env.TEMP_IMAGE_NAME  }} ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
 
       - name: Set remote Image Tag
         run: docker tag ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} ${{  secrets.REGISTRY_URL  }}/${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}
@@ -67,7 +70,7 @@ jobs:
     needs: push
     steps:
       - name: Run Container
-        run: docker run -itd -p 8888:8080 --name ${{  env.IMAGE_NAME  }} ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
+        run: docker run -itd -p 8888:8080 --restart=always --name ${{  env.IMAGE_NAME  }} ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
 
 
 
