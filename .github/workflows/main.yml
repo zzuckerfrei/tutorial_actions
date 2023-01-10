@@ -50,7 +50,7 @@ jobs:
   push:
     name: Push
     runs-on: self-hosted
-    needs: clean
+    needs: clean-2
     steps:
       - name: Log in to registry
         run: docker login ${{  secrets.REGISTRY_URL  }} -u ${{  secrets.REGISTRY_USERNAME  }} -p ${{  secrets.REGISTRY_PASSWORD  }}
