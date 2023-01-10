@@ -6,11 +6,11 @@ on: [push]
 env:
   TEMP_IMAGE_NAME: temp-img
   IMAGE_NAME: tutorial-actions
-  IMAGE_VERSION: "0.16"
+  IMAGE_VERSION: "0.16.1"
 
 jobs:
   clean-1:
-    name: clean-1
+    name: Clean-1
     runs-on: self-hosted
     if: ${{ contains(github.event.head_commit.message, '#dev') || contains(github.event.head_commit.message, '#cicd')}}
     steps:
@@ -34,7 +34,7 @@ jobs:
         run: docker build -t ${{  env.TEMP_IMAGE_NAME  }} .
 
   clean-2:
-    name: clean-2
+    name: Clean-2
     runs-on: self-hosted
     needs: build
     steps:
@@ -80,7 +80,7 @@ jobs:
         run: docker run -itd -p 8888:8080 --restart=always --name ${{  env.IMAGE_NAME  }} ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
 
   update:
-    name: update
+    name: Update VAR
     runs-on: self-hosted
     needs: deploy
     steps:
