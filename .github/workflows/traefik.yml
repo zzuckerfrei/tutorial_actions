@@ -1,0 +1,35 @@
+name: traefik test
+
+
+on: [ push ]
+
+env:
+  TEMP_IMAGE_NAME: temp-img
+  IMAGE_NAME: tutorial-actions
+  IMAGE_VERSION: "0.16.3"
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: self-hosted
+    if: ${{ contains(github.event.head_commit.message, '#traefik')}}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Build Docker image
+        #        run: docker build -t ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} .
+        run: docker buildx build -t ${{  env.TEMP_IMAGE_NAME  }}:0.1 .
+
+#  deploy:
+#    name: Deploy
+#    runs-on: self-hosted
+#    needs: push
+#    steps:
+#      - name: Run Container
+#        run: docker run -itd -p 8888:8080 --restart=always --name ${{  env.IMAGE_NAME  }} ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }}  && echo "=== finish ==="
