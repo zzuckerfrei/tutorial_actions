@@ -23,7 +23,6 @@ jobs:
           java-version: 17
 
       - name: Build Docker image
-        #        run: docker build -t ${{  env.IMAGE_NAME  }}:${{  env.IMAGE_VERSION  }} .
         run: docker buildx build -t ${{  env.TEMP_IMAGE_NAME  }}:0.1 .
 
 #  deploy:
